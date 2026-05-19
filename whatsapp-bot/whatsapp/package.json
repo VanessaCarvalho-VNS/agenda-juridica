@@ -1,0 +1,18 @@
+{
+  "name": "whatsapp-bot-agenda-juridica",
+  "version": "1.0.0",
+  "description": "Bot de atendimento WhatsApp - Rute Santos Advocacia",
+  "main": "whatsapp.js",
+  "scripts": {
+    "start": "node whatsapp.js",
+    "dev": "nodemon whatsapp.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "pino": "^8.21.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
