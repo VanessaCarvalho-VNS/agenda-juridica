@@ -5,4 +5,4 @@ nixPkgs = ["nodejs_20"]
 cmds = ["npm install"]
 
 [start]
-cmd = "node src/database/migrate.js && node src/server.js"
+cmd = "node src/database/migrate.js; node src/server.js"
