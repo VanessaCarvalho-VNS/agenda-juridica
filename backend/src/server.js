@@ -21,12 +21,10 @@ const allowedOrigins = process.env.FRONTEND_URL
   : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({
-  origin: (origin, cb) =>
-    (!origin || allowedOrigins.includes(origin))
-      ? cb(null, true)
-      : cb(new Error('CORS')),
+  origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 app.use(express.json());
