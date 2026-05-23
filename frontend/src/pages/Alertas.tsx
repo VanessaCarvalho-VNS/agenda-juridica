@@ -124,8 +124,8 @@ export default function Alertas() {
         {/* Modal Criar */}
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>Novo Alerta</DialogTitle></DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>Novo Alerta</DialogTitle></DialogHeader>
+            <form onSubmit={handleCreate} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
               <div className="space-y-2"><Label>Título *</Label><Input value={form.titulo} onChange={set('titulo')} placeholder="Ex: Audiência amanhã às 14h" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -161,7 +161,7 @@ export default function Alertas() {
               <div className="space-y-2">
                 <Label>Mensagem</Label>
                 <textarea value={form.mensagem} onChange={e => setForm(f => ({ ...f, mensagem: e.target.value }))}
-                  placeholder="Detalhes do alerta..." rows={3}
+                  placeholder="Detalhes do alerta..." rows={2}
                   className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 resize-none" />
               </div>
               <div className="flex gap-2 justify-end pt-2">

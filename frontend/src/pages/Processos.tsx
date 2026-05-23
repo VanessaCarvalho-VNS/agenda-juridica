@@ -92,8 +92,8 @@ export default function Processos() {
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button onClick={openCreate}><Plus className="w-4 h-4 mr-2" />Novo Processo</Button></DialogTrigger>
             <DialogContent className="max-w-lg">
-              <DialogHeader><DialogTitle>{editing ? 'Editar Processo' : 'Novo Processo'}</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>{editing ? 'Editar Processo' : 'Novo Processo'}</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
                 <div className="space-y-2"><Label>Número do Processo</Label><Input value={form.numero} onChange={set('numero')} placeholder="2024.001.234-5" /></div>
                 <div className="space-y-2"><Label>Cliente</Label><Input value={form.cliente_nome} onChange={set('cliente_nome')} placeholder="Nome do cliente" /></div>
                 <div className="space-y-2"><Label>Tipo</Label><Input value={form.tipo} onChange={set('tipo')} placeholder="Trabalhista, Cível, Criminal..." /></div>
@@ -112,8 +112,8 @@ export default function Processos() {
                   <div className="space-y-2"><Label>Data de Início</Label><Input type="date" value={form.data_inicio} onChange={set('data_inicio')} /></div>
                   <div className="space-y-2"><Label>Próxima Audiência</Label><Input type="date" value={form.proxima_audiencia} onChange={set('proxima_audiencia')} /></div>
                 </div>
-                <div className="space-y-2"><Label>Observações</Label><Textarea value={form.observacoes} onChange={set('observacoes')} placeholder="Observações..." rows={3} /></div>
-                <div className="flex gap-2 justify-end pt-4">
+                <div className="space-y-2"><Label>Observações</Label><Textarea value={form.observacoes} onChange={set('observacoes')} placeholder="Observações..." rows={2} /></div>
+                <div className="flex gap-2 justify-end pt-2 sticky bottom-0 bg-white/90 pb-1">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                   <Button type="submit" disabled={loading}>{loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{editing ? 'Atualizar' : 'Cadastrar'}</Button>
                 </div>

@@ -192,15 +192,15 @@ export default function Financeiro() {
 
         {/* Modais */}
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Cadastrar Honorário</DialogTitle></DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">{renderFormFields()}
+          <DialogContent className="max-w-md"><DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>Cadastrar Honorário</DialogTitle></DialogHeader>
+            <form onSubmit={handleCreate} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">{renderFormFields()}
               <div className="flex gap-2 justify-end pt-2"><Button type="button" variant="outline" onClick={()=>setCreateOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={loading}>{loading&&<Loader2 className="w-4 h-4 animate-spin mr-2"/>}Cadastrar</Button></div>
             </form></DialogContent>
         </Dialog>
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Editar Honorário</DialogTitle></DialogHeader>
-            <form onSubmit={handleEdit} className="space-y-4">{renderFormFields()}
+          <DialogContent className="max-w-md"><DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>Editar Honorário</DialogTitle></DialogHeader>
+            <form onSubmit={handleEdit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">{renderFormFields()}
               <div className="flex gap-2 justify-end pt-2"><Button type="button" variant="outline" onClick={()=>setEditOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={loading}>{loading&&<Loader2 className="w-4 h-4 animate-spin mr-2"/>}Salvar</Button></div>
             </form></DialogContent>
