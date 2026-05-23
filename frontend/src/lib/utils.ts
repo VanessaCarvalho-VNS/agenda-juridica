@@ -6,22 +6,20 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Safely format a date string or Date object to pt-BR locale.
- * MySQL returns dates as "YYYY-MM-DD" strings (no timezone suffix).
- * Appending T00:00 avoids UTC-offset shifting the day.
+ * Formata data sem conversão de fuso horário.
+ * Lê diretamente os componentes da string "YYYY-MM-DD".
  */
 export function fmtDate(value: string | null | undefined): string {
   if (!value) return '-'
-  // Already has time component (ISO datetime) — use as-is
-  const raw = value.includes('T') ? value : value.split('T')[0] + 'T00:00'
-  const d = new Date(raw)
-  if (isNaN(d.getTime())) return '-'
-  return d.toLocaleDateString('pt-BR')
+  const dateOnly = value.split('T')[0] // garante só "YYYY-MM-DD"
+  const parts = dateOnly.split('-')
+  if (parts.length !== 3) return '-'
+  const [year, month, day] = parts
+  return `${day}/${month}/${year}`
 }
 
 export function fmtTime(value: string | null | undefined): string {
   if (!value) return ''
-  // HH:MM:SS from MySQL → slice to HH:MM
   if (/^\d{2}:\d{2}/.test(value)) return value.slice(0, 5)
   const d = new Date(value)
   if (isNaN(d.getTime())) return ''
@@ -34,7 +32,7 @@ export function fmtCurrency(value: number | string | null | undefined): string {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-/** Convert "YYYY-MM-DDTHH:MM:SS" or "YYYY-MM-DD" to "YYYY-MM-DD" for <input type="date"> */
+/** Converte "YYYY-MM-DDTHH:MM:SS" ou "YYYY-MM-DD" para "YYYY-MM-DD" para <input type="date"> */
 export function toInputDate(value: string | null | undefined): string {
   if (!value) return ''
   return value.split('T')[0]
