@@ -165,9 +165,9 @@ export default function Agenda() {
 
         {/* Dialog */}
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>{editing ? 'Editar Evento' : 'Adicionar Evento à Agenda'}</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
+          <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+            <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>{editing ? 'Editar Evento' : 'Adicionar Evento à Agenda'}</DialogTitle></DialogHeader>
+            <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
               <div className="space-y-2">
                 <Label>Título</Label>
                 <Input value={form.titulo} onChange={set('titulo')} placeholder="Ex: Audiência - Cliente X" />
@@ -210,7 +210,7 @@ export default function Agenda() {
                 <Label>Observações</Label>
                 <Textarea value={form.observacoes} onChange={set('observacoes')} placeholder="Detalhes sobre o evento..." rows={2} />
               </div>
-              <div className="flex gap-2 justify-end pt-2 sticky bottom-0 bg-white/90 pb-1">
+              <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={loading}>
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}

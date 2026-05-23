@@ -88,9 +88,9 @@ export default function Clientes() {
             <DialogTrigger asChild>
               <Button onClick={openCreate}><Plus className="w-4 h-4 mr-2" />Novo Cliente</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>{editing ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
+            <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+              <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>{editing ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
                 <div className="space-y-2"><Label>Nome Completo</Label><Input value={form.nome} onChange={set('nome')} placeholder="Nome do cliente" /></div>
                 <div className="space-y-2"><Label>CPF</Label><Input value={form.cpf} onChange={set('cpf')} placeholder="000.000.000-00" /></div>
                 <div className="space-y-2"><Label>E-mail</Label><Input type="email" value={form.email} onChange={set('email')} placeholder="email@exemplo.com" /></div>
@@ -105,7 +105,7 @@ export default function Clientes() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex gap-2 justify-end pt-2 sticky bottom-0 bg-white/90 pb-1">
+                <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                   <Button type="submit" disabled={loading}>
                     {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}

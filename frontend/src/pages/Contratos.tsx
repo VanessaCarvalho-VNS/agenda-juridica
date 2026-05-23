@@ -188,9 +188,9 @@ export default function Contratos() {
 
         {/* Modal Cadastrar/Editar */}
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>{editing ? 'Editar Contrato' : 'Cadastrar Contrato'}</DialogTitle></DialogHeader>
-            <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
+          <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+            <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>{editing ? 'Editar Contrato' : 'Cadastrar Contrato'}</DialogTitle></DialogHeader>
+            <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
               <div className="space-y-2"><Label>Cliente *</Label><Input value={form.cliente} onChange={set('cliente')} placeholder="Nome do cliente" /></div>
               <div className="space-y-2"><Label>Tipo de Contrato *</Label><Input value={form.tipo} onChange={set('tipo')} placeholder="Ex: Prestação de Serviços" /></div>
               <div className="space-y-2"><Label>Valor (R$)</Label><Input type="number" step="0.01" value={form.valor} onChange={set('valor')} placeholder="0.00" /></div>
@@ -217,7 +217,7 @@ export default function Contratos() {
                 <textarea value={form.observacoes} onChange={set('observacoes')} placeholder="Observações..." rows={2}
                   className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 resize-none" />
               </div>
-              <div className="flex gap-2 justify-end pt-2">
+              <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={loading}>{loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{editing ? 'Salvar' : 'Cadastrar'}</Button>
               </div>
@@ -328,7 +328,7 @@ export default function Contratos() {
 
         {/* Modal Detalhes */}
         <Dialog open={detalhesOpen} onOpenChange={setDetalhesOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
             <DialogHeader>
               <div className="flex items-center justify-between pr-8">
                 <DialogTitle>Detalhes do Contrato</DialogTitle>

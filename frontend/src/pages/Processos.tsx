@@ -91,9 +91,9 @@ export default function Processos() {
           <div><h2 className="text-2xl font-bold">Gestão de Processos</h2><p className="text-slate-500">Gerencie todos os processos do escritório</p></div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button onClick={openCreate}><Plus className="w-4 h-4 mr-2" />Novo Processo</Button></DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>{editing ? 'Editar Processo' : 'Novo Processo'}</DialogTitle></DialogHeader>
-              <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
+            <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
+              <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>{editing ? 'Editar Processo' : 'Novo Processo'}</DialogTitle></DialogHeader>
+              <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
                 <div className="space-y-2"><Label>Número do Processo</Label><Input value={form.numero} onChange={set('numero')} placeholder="2024.001.234-5" /></div>
                 <div className="space-y-2"><Label>Cliente</Label><Input value={form.cliente_nome} onChange={set('cliente_nome')} placeholder="Nome do cliente" /></div>
                 <div className="space-y-2"><Label>Tipo</Label><Input value={form.tipo} onChange={set('tipo')} placeholder="Trabalhista, Cível, Criminal..." /></div>
@@ -113,7 +113,7 @@ export default function Processos() {
                   <div className="space-y-2"><Label>Próxima Audiência</Label><Input type="date" value={form.proxima_audiencia} onChange={set('proxima_audiencia')} /></div>
                 </div>
                 <div className="space-y-2"><Label>Observações</Label><Textarea value={form.observacoes} onChange={set('observacoes')} placeholder="Observações..." rows={2} /></div>
-                <div className="flex gap-2 justify-end pt-2 sticky bottom-0 bg-white/90 pb-1">
+                <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                   <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
                   <Button type="submit" disabled={loading}>{loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{editing ? 'Atualizar' : 'Cadastrar'}</Button>
                 </div>

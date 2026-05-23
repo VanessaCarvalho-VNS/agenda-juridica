@@ -123,9 +123,9 @@ export default function Alertas() {
 
         {/* Modal Criar */}
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0"><DialogTitle>Novo Alerta</DialogTitle></DialogHeader>
-            <form onSubmit={handleCreate} className="overflow-y-auto flex-1 px-6 pb-6 pt-2 space-y-3">
+          <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+            <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>Novo Alerta</DialogTitle></DialogHeader>
+            <form onSubmit={handleCreate} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
               <div className="space-y-2"><Label>Título *</Label><Input value={form.titulo} onChange={set('titulo')} placeholder="Ex: Audiência amanhã às 14h" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -164,7 +164,7 @@ export default function Alertas() {
                   placeholder="Detalhes do alerta..." rows={2}
                   className="flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 resize-none" />
               </div>
-              <div className="flex gap-2 justify-end pt-2">
+              <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                 <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
                 <Button type="submit" disabled={loading}>{loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}Criar Alerta</Button>
               </div>
