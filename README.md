@@ -274,6 +274,10 @@ O projeto está configurado para deploy no **Railway**:
 
 Para outros provedores (Render, Vercel, Fly.io), configure as variáveis de ambiente listadas nos arquivos `.env.example`.
 
+---
+
+## ☁️ Deploy
+
 
 - **Frontend:** hospedado no [Vercel](https://agenda-juridica-iota.vercel.app)
 - **Backend (API):** hospedado no [Railway](https://agenda-juridica-production.up.railway.app)
@@ -287,6 +291,7 @@ GET https://agenda-juridica-production.up.railway.app/api/health → { "status":
 |----------|-----|
 | Frontend | https://agenda-juridica-iota.vercel.app |
 | Backend  | https://agenda-juridica-production.up.railway.app |
+
 
 ---
 
