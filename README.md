@@ -327,8 +327,6 @@ Este projeto é de uso privado. Todos os direitos reservados.
 ## 👨‍💻 Desenvolvido por
 
 <div align="center">
-
-<img src="https://raw.githubusercontent.com/VanessaCarvalho-VNS/agenda-juridica/main/assets/logo.png" alt="V-GLAMP" width="350"/>
   
 **Desenvolvimento de software sob medida para escritórios e empresas.**
 **V-GLAMP Programando o Futuro**
