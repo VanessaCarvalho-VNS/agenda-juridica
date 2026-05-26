@@ -328,8 +328,14 @@ Este projeto é de uso privado. Todos os direitos reservados.
 
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/SEU-USUARIO/agenda-juridica/main/assets/logo.png" alt="V-GLAMP" width="350"/>
+  
+**Desenvolvimento de software sob medida para escritórios e empresas.**
 **V-GLAMP Programando o Futuro**
 
-Desenvolvimento de software sob medida para escritórios e empresas.
-
 </div>
+
+
+
+
+
