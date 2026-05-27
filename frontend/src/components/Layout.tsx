@@ -255,7 +255,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 {/* Seção V-GLAMP com logo */}
               <span className="text-xs text-slate-300 font-medium" >
                 Desenvolvido por:<img src={Logo_V_GLAMP}  alt="V-GLAMP - Programando o Futuro"
-                style={{ height: '32px', objectFit: 'contain' }}/>
+                style={{ height: '28px', objectFit: 'contain' }}/>
               </span> |
              
               <span className="text-xstext-slate-500 font-medium">Contato: (11) 94340-3631</span>
