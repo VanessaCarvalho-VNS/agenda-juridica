@@ -16,7 +16,7 @@ import {
 import { Button } from "./ui";
 import logo from "../assets/logo.png";
 import badgeRS from "../assets/badgeRS.png";
-import Logo_V_GLAMP from "../assets/Logo_V-GLAMP.png";
+import Logo_V_GLAMP from "../assets/Logo_V-GLAMP.png";    
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -251,9 +251,13 @@ export function Layout({ children }: { children: ReactNode }) {
 
               {/* Desenvolvedor */}
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500 font-medium"> Desenvolvido por: </span>
-                <span className="text-xs text-slate-300 font-semibold"> V-GLAMP - Programando o Futuro</span> |
-                <span className="text-xs text-slate-500">Contato: (11) 94340-3631</span>
+
+                {/* Seção V-GLAMP com logo */}
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                Desenvolvido por:<img src={Logo_V_GLAMP}  alt="V-GLAMP - Programando o Futuro"
+                style={{ height: '28px', objectFit: 'contain' }}/>
+              </span> |
+              <span>Contato: (11) 94340-3631</span>
                
               </div>
 
