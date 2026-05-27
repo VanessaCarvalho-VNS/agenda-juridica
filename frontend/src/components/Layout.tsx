@@ -252,8 +252,9 @@ export function Layout({ children }: { children: ReactNode }) {
               {/* Desenvolvedor */}
               <div className="flex items-center gap-3">
                 <span className="text-xs text-slate-500 font-medium"> Desenvolvido por: </span>
-                <span className="text-xs text-slate-300 font-semibold"> V-GLAMP - Programando o Futuro</span>
-                <img src={Logo_V_GLAMP} alt="V-GLAMP"  className="h-12 md:h-12 w-auto object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105" />
+                <span className="text-xs text-slate-300 font-semibold"> V-GLAMP - Programando o Futuro</span> |
+                <span className="text-xs text-slate-500">Contato: (11) 94340-3631</span>
+               
               </div>
 
               {/* Badge */}
