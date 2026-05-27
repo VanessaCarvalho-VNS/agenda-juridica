@@ -250,15 +250,17 @@ export function Layout({ children }: { children: ReactNode }) {
               </p>
 
               {/* Desenvolvedor */}
-              <div className=" flex items-center gap-3">
+              <div className="flex items-center gap-3">
 
-                {/* Seção V-GLAMP com logo */}
-              <span className="text-xs text-slate-300 font-medium" >
-                Desenvolvido por:<img src={Logo_V_GLAMP}  alt="V-GLAMP - Programando o Futuro"/>
-              </span> |
-             
-              <span className="text-white font-medium">Contato: (11) 94340-3631</span>
-               
+              {/* Seção V-GLAMP com logo */}
+              <span className="flex items-center gap-2 text-xs text-slate-300 font-medium">
+               Desenvolvido por:
+              <img src={Logo_V_GLAMP} alt="V-GLAMP - Programando o Futuro" style={{ height: '28px', objectFit: 'contain' }} />
+              </span>
+
+              <span className="text-slate-600">|</span>
+
+              <span className="text-xs text-white font-medium">Contato: (11) 94340-3631</span>
               </div>
 
               {/* Badge */}
