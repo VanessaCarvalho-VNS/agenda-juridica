@@ -330,6 +330,7 @@ Este projeto é de uso privado. Todos os direitos reservados.
   
 **Desenvolvimento de software sob medida para escritórios e empresas.**
 **V-GLAMP Programando o Futuro**
+<img  height="150" alt="Image" src="https://github.com/user-attachments/assets/c8c0832e-7280-46f1-a833-9d3aee6efefb" />
 
 </div>
 
