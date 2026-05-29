@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://agenda-juridica-production.up.railway.app/api'
+const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 function getToken() {
   return localStorage.getItem('token')
