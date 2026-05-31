@@ -88,7 +88,7 @@ router.post('/contratos/:id', upload.single('arquivo'), async (req, res) => {
       arquivo: {
         nome_original: req.file.originalname,
         tamanho:       req.file.size,
-        url:           result.secure_url
+        url:           result.secure_url.replace('/upload/', '/upload/fl_attachment/')
       }
     })
   } catch (err) {
