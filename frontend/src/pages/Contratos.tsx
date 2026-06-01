@@ -379,17 +379,15 @@ export default function Contratos() {
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
                           <Button variant="ghost" size="sm" title="Download"
-                            onClick={() => fetch(doc.url).then(res => res.blob()).then(blob => {
-                              const url = URL.createObjectURL(blob)
-                              const a = document.createElement('a')
-                              a.href = url
-                              a.download = doc.nome
-                              document.body.appendChild(a)
-                              a.click()
-                              a.remove()
-                              URL.revokeObjectURL(url)  
+                            onClick={() => {fetch(doc.url).then(r => r.blob()).then(blob => {
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = doc.nome || 'contrato.pdf'
+                            a.click()
+                            URL.revokeObjectURL(url)
                             })
-                            .catch(()=> window.open(doc.url, '_blank'))}>
+                            .catch(() => window.open(doc.url, '_blank'))}}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" title="Remover arquivo"
