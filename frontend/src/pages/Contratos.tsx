@@ -18,7 +18,7 @@ interface Contrato {
   data_inicio: string; data_fim: string; valor: number; arquivo_nome: string; observacoes: string
 }
 interface Arquivo {
-  nome: string; tamanho?: number; url: string; criado_em?: string
+  nome: string; tamanho: number; url: string; criado_em: string
 }
 
 const emptyForm = { cliente: '', tipo: '', valor: '', data_inicio: '', data_fim: '', status: 'ativo', observacoes: '' }
@@ -30,11 +30,9 @@ const statusConfig: Record<string, { label: string; variant: any }> = {
 }
 const LIMIT = 10
 
-// URL base do backend — funciona local e em produção
-const API_BASE = import.meta.env.VITE_API_URL || 'https://agenda-juridica-production.up.railway.app/api'
+const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || ''
 
 function fmtBytes(bytes: number) {
-  if (!bytes) return ''
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
@@ -57,30 +55,29 @@ export default function Contratos() {
   const uploadTargetRef = useRef<number | null>(null)
 
   useEffect(() => {
-    api.getContratos()
-      .then(setContratos)
-      .catch(() => toast.error('Erro ao carregar contratos'))
-      .finally(() => setFetching(false))
+    api.getContratos().then(data => {
+      setContratos(data)
+    }).catch(() => toast.error('Erro ao carregar contratos')).finally(() => setFetching(false))
   }, [])
 
+  // Carrega arquivos de um contrato ao abrir detalhes
   const carregarArquivos = async (id: number) => {
     try {
       const token = localStorage.getItem('token')
-      const res   = await fetch(`${API_BASE}/uploads/contratos/${id}/arquivos`, {
+      const res   = await fetch(`/api/uploads/contratos/${id}/arquivos`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
-      setArquivosMap(prev => ({ ...prev, [id]: Array.isArray(data) ? data : [] }))
+      setArquivosMap(prev => ({ ...prev, [id]: data }))
     } catch { /* silencioso */ }
   }
 
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }))
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
 
   const openCreate = () => { setEditing(null); setForm(emptyForm); setOpen(true) }
   const openEdit   = (c: Contrato) => {
     setEditing(c)
-    setForm({ cliente: c.cliente||'', tipo: c.tipo||'', valor: c.valor ? String(c.valor) : '',
+    setForm({ cliente: c.cliente||'', tipo: c.tipo||'', valor: c.valor?String(c.valor):'',
       data_inicio: toInputDate(c.data_inicio), data_fim: toInputDate(c.data_fim),
       status: c.status||'ativo', observacoes: c.observacoes||'' })
     setOpen(true)
@@ -91,12 +88,9 @@ export default function Contratos() {
     if (!form.cliente || !form.tipo) return toast.error('Cliente e tipo são obrigatórios')
     setLoading(true)
     try {
-      const payload = {
-        titulo: `${form.tipo} - ${form.cliente}`, cliente: form.cliente, tipo: form.tipo,
-        valor: form.valor ? parseFloat(form.valor) : null,
-        data_inicio: form.data_inicio || null, data_fim: form.data_fim || null,
-        status: form.status, observacoes: form.observacoes || null
-      }
+      const payload = { titulo: `${form.tipo} - ${form.cliente}`, cliente: form.cliente, tipo: form.tipo,
+        valor: form.valor ? parseFloat(form.valor) : null, data_inicio: form.data_inicio||null,
+        data_fim: form.data_fim||null, status: form.status, observacoes: form.observacoes||null }
       if (editing) {
         const updated = await api.updateContrato(editing.id, payload)
         setContratos(cs => cs.map(c => c.id === editing.id ? updated : c))
@@ -121,6 +115,7 @@ export default function Contratos() {
     } catch (err: any) { toast.error(err.message) }
   }
 
+  // ── Upload real para o backend ──
   const handleUploadClick = (id: number) => {
     uploadTargetRef.current = id
     fileRef.current?.click()
@@ -138,8 +133,7 @@ export default function Contratos() {
       const formData = new FormData()
       formData.append('arquivo', file)
 
-      // USA API_BASE para funcionar em produção
-      const res = await fetch(`${API_BASE}/uploads/contratos/${id}`, {
+      const res = await fetch(`/api/uploads/contratos/${id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -149,7 +143,9 @@ export default function Contratos() {
 
       toast.success(`"${file.name}" enviado com sucesso!`)
       await carregarArquivos(id)
-      setContratos(cs => cs.map(c => c.id === id ? { ...c, arquivo_nome: data.arquivo?.url || file.name } : c))
+
+      // Atualiza arquivo_nome no contrato local
+      setContratos(cs => cs.map(c => c.id === id ? { ...c, arquivo_nome: data.arquivo.nome_salvo } : c))
     } catch (err: any) {
       toast.error(err.message || 'Erro ao enviar arquivo')
     } finally {
@@ -161,7 +157,7 @@ export default function Contratos() {
     if (!confirm('Remover arquivo do contrato?')) return
     try {
       const token = localStorage.getItem('token')
-      await fetch(`${API_BASE}/uploads/contratos/${contratoId}/arquivo`, {
+      await fetch(`/api/uploads/contratos/${contratoId}/arquivo`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -173,14 +169,16 @@ export default function Contratos() {
 
   const totalAtivos   = contratos.filter(c => c.status === 'ativo').length
   const totalVencidos = contratos.filter(c => c.status === 'vencido' || c.status === 'encerrado').length
-  const valorTotal    = contratos.filter(c => c.status === 'ativo').reduce((a, c) => a + Number(c.valor || 0), 0)
-  const totalPages    = Math.max(1, Math.ceil(contratos.length / LIMIT))
-  const safePage      = Math.min(page, totalPages)
-  const paginated     = contratos.slice((safePage - 1) * LIMIT, safePage * LIMIT)
+  const valorTotal    = contratos.filter(c => c.status === 'ativo').reduce((a, c) => a + Number(c.valor||0), 0)
+
+  const totalPages = Math.max(1, Math.ceil(contratos.length / LIMIT))
+  const safePage   = Math.min(page, totalPages)
+  const paginated  = contratos.slice((safePage - 1) * LIMIT, safePage * LIMIT)
 
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Input de arquivo oculto */}
         <input ref={fileRef} type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" className="hidden" onChange={handleFileChange} />
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -191,9 +189,7 @@ export default function Contratos() {
         {/* Modal Cadastrar/Editar */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
-            <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100">
-              <DialogTitle>{editing ? 'Editar Contrato' : 'Cadastrar Contrato'}</DialogTitle>
-            </DialogHeader>
+            <DialogHeader className="px-6 pt-5 pb-1 flex-shrink-0 border-b border-slate-100"><DialogTitle>{editing ? 'Editar Contrato' : 'Cadastrar Contrato'}</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-6 py-4 space-y-3">
               <div className="space-y-2"><Label>Cliente *</Label><Input value={form.cliente} onChange={set('cliente')} placeholder="Nome do cliente" /></div>
               <div className="space-y-2"><Label>Tipo de Contrato *</Label><Input value={form.tipo} onChange={set('tipo')} placeholder="Ex: Prestação de Serviços" /></div>
@@ -223,10 +219,7 @@ export default function Contratos() {
               </div>
               <div className="flex gap-2 justify-end pt-3 border-t border-slate-100 mt-1">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={loading}>
-                  {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  {editing ? 'Salvar' : 'Cadastrar'}
-                </Button>
+                <Button type="submit" disabled={loading}>{loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}{editing ? 'Salvar' : 'Cadastrar'}</Button>
               </div>
             </form>
           </DialogContent>
@@ -283,23 +276,21 @@ export default function Contratos() {
                     </TableHeader>
                     <TableBody>
                       {paginated.map(c => {
-                        const sc     = statusConfig[c.status] || { label: c.status, variant: 'secondary' }
+                        const sc = statusConfig[c.status] || { label: c.status, variant: 'secondary' }
                         const temDoc = !!c.arquivo_nome
                         return (
                           <TableRow key={c.id}>
                             <TableCell className="font-medium">{c.cliente}</TableCell>
-                            <TableCell className="max-w-[180px] truncate">{c.tipo || '-'}</TableCell>
+                            <TableCell className="max-w-[180px] truncate">{c.tipo||'-'}</TableCell>
                             <TableCell>{c.valor ? fmtCurrency(Number(c.valor)) : '-'}</TableCell>
                             <TableCell>
-                              <div className="text-sm">
-                                <p>{fmtDate(c.data_inicio)}</p>
-                                {c.data_fim && <p className="text-slate-500">até {fmtDate(c.data_fim)}</p>}
-                              </div>
+                              <div className="text-sm"><p>{fmtDate(c.data_inicio)}</p>{c.data_fim&&<p className="text-slate-500">até {fmtDate(c.data_fim)}</p>}</div>
                             </TableCell>
                             <TableCell><Badge variant={sc.variant}>{sc.label}</Badge></TableCell>
                             <TableCell>
                               <div className={`flex items-center gap-1 ${temDoc ? 'text-blue-600' : 'text-slate-400'}`}>
-                                <FileText className="w-4 h-4" /><span className="text-sm">{temDoc ? '1' : '0'}</span>
+                                <FileText className="w-4 h-4" />
+                                <span className="text-sm">{temDoc ? '1' : '0'}</span>
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
@@ -312,8 +303,11 @@ export default function Contratos() {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                                 <Button variant="ghost" size="icon" title="Anexar documento"
-                                  disabled={uploading === c.id} onClick={() => handleUploadClick(c.id)}>
-                                  {uploading === c.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                  disabled={uploading === c.id}
+                                  onClick={() => handleUploadClick(c.id)}>
+                                  {uploading === c.id
+                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                    : <Upload className="w-4 h-4" />}
                                 </Button>
                                 <Button variant="ghost" size="icon" title="Excluir" onClick={() => handleDelete(c.id)}>
                                   <Trash2 className="w-4 h-4 text-red-500" />
@@ -339,8 +333,7 @@ export default function Contratos() {
               <div className="flex items-center justify-between pr-8">
                 <DialogTitle>Detalhes do Contrato</DialogTitle>
                 {selected && (
-                  <Button size="sm" variant="outline"
-                    onClick={() => { setDetalhesOpen(false); setTimeout(() => openEdit(selected), 50) }}>
+                  <Button size="sm" variant="outline" onClick={() => { setDetalhesOpen(false); setTimeout(() => openEdit(selected), 50) }}>
                     <Edit className="w-4 h-4 mr-2" />Editar
                   </Button>
                 )}
@@ -350,19 +343,18 @@ export default function Contratos() {
               const sc   = statusConfig[selected.status] || { label: selected.status, variant: 'secondary' }
               const docs = arquivosMap[selected.id] || []
               return (
-                <div className="overflow-y-auto flex-1 px-1 space-y-6">
+                <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label>Cliente</Label><p className="text-sm mt-1 font-medium">{selected.cliente}</p></div>
-                    <div><Label>Tipo</Label><p className="text-sm mt-1">{selected.tipo || '-'}</p></div>
+                    <div><Label>Tipo</Label><p className="text-sm mt-1">{selected.tipo||'-'}</p></div>
                     <div><Label>Valor</Label><p className="text-lg font-bold mt-1">{selected.valor ? fmtCurrency(Number(selected.valor)) : '-'}</p></div>
                     <div><Label>Status</Label><div className="mt-1"><Badge variant={sc.variant}>{sc.label}</Badge></div></div>
                     <div><Label>Data de Início</Label><p className="text-sm mt-1">{fmtDate(selected.data_inicio)}</p></div>
                     <div><Label>Data de Vigência</Label><p className="text-sm mt-1">{fmtDate(selected.data_fim)}</p></div>
-                    {selected.observacoes && (
-                      <div className="col-span-2"><Label>Observações</Label><p className="text-sm mt-1 text-slate-600">{selected.observacoes}</p></div>
-                    )}
+                    {selected.observacoes && <div className="col-span-2"><Label>Observações</Label><p className="text-sm mt-1 text-slate-600">{selected.observacoes}</p></div>}
                   </div>
 
+                  {/* Documentos */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label>Documentos ({docs.length})</Label>
@@ -382,12 +374,22 @@ export default function Contratos() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">{doc.nome}</p>
-                            {doc.tamanho && <p className="text-xs text-slate-400">{fmtBytes(doc.tamanho)}</p>}
+                            <p className="text-xs text-slate-400">{fmtBytes(doc.tamanho)}</p>
                           </div>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
-                          <Button variant="ghost" size="sm" title="Abrir arquivo"
-                            onClick={() => window.open(doc.url, '_blank')}>
+                          <Button variant="ghost" size="sm" title="Download"
+                            onClick={() => fetch(doc.url).then(res => res.blob()).then(blob => {
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = doc.nome
+                              document.body.appendChild(a)
+                              a.click()
+                              a.remove()
+                              URL.revokeObjectURL(url)  
+                            })
+                            .catch(()=> window.open(doc.url, '_blank'))}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" title="Remover arquivo"
