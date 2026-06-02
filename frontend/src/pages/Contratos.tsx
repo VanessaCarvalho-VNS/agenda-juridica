@@ -65,7 +65,7 @@ export default function Contratos() {
   const carregarArquivos = async (id: number) => {
     try {
       const token = localStorage.getItem('token')
-      const res   = await fetch(`${API_BASE}/uploads/contratos/${id}/arquivos`, {
+      const res   = await fetch(`${API_BASE}/api/uploads/contratos/${id}/arquivos`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = await res.json()
