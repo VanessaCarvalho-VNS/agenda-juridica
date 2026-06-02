@@ -145,7 +145,7 @@ export default function Processos() {
                       <TableRow>
                         <TableHead>Número</TableHead><TableHead>Cliente</TableHead><TableHead>Tipo</TableHead>
                         <TableHead>Status</TableHead><TableHead>Início</TableHead><TableHead>Próx. Audiência</TableHead>
-                        <TableHead>Docs</TableHead><TableHead className="text-right">Ações</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -168,7 +168,7 @@ export default function Processos() {
                                 ? <div className="flex items-center gap-1 text-sm text-blue-600"><Calendar className="w-3 h-3" />{fmtDate(p.proxima_audiencia)}</div>
                                 : '-'}
                             </TableCell>
-                            <TableCell><div className="flex items-center gap-1 text-slate-400"><FileText className="w-4 h-4" /><span className="text-sm">0</span></div></TableCell>
+                            
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Edit className="w-4 h-4" /></Button>
