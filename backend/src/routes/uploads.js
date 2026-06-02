@@ -36,6 +36,7 @@ function uploadToCloudinary(buffer, filename) {
         folder: 'agenda-juridica/contratos',
         public_id: filename,
         resource_type: 'raw', // permite PDF e DOC
+        access_mode: 'public',
       },
       (error, result) => {
         if (error) reject(error)
