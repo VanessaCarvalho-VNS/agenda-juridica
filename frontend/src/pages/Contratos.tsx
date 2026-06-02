@@ -134,7 +134,7 @@ export default function Contratos() {
       const formData = new FormData()
       formData.append('arquivo', file)
 
-      const res = await fetch(`${API_BASE}/uploads/contratos/${id}`, {
+      const res = await fetch(`${API_BASE}/api/uploads/contratos/${id}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -158,7 +158,7 @@ export default function Contratos() {
     if (!confirm('Remover arquivo do contrato?')) return
     try {
       const token = localStorage.getItem('token')
-      await fetch(`${API_BASE}/uploads/contratos/${contratoId}/arquivo`, {
+      await fetch(`${API_BASE}/api/uploads/contratos/${contratoId}/arquivo`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       })
