@@ -109,17 +109,19 @@ async function migrate() {
     );
 
     -- Tabela de contratos
+    -- ✅ CORRIGIDO: status inclui 'vencido' + coluna arquivo_resource_type adicionada
     CREATE TABLE IF NOT EXISTS contratos (
       id INT AUTO_INCREMENT PRIMARY KEY,
       usuario_id INT NOT NULL,
       titulo VARCHAR(255) NOT NULL,
       cliente VARCHAR(255) NOT NULL,
       tipo VARCHAR(100),
-      status ENUM('ativo', 'encerrado', 'pendente') DEFAULT 'ativo',
+      status ENUM('ativo', 'encerrado', 'pendente', 'vencido') DEFAULT 'ativo',
       data_inicio DATE,
       data_fim DATE,
       valor DECIMAL(10,2),
-      arquivo_nome VARCHAR(255),
+      arquivo_nome VARCHAR(500),
+      arquivo_resource_type VARCHAR(10) DEFAULT 'raw',
       observacoes TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -131,6 +133,35 @@ async function migrate() {
 
   console.log('✅ Migração concluída com sucesso!');
   console.log('📋 Tabelas criadas: usuarios, clientes, processos, agenda, alertas, financeiro, contratos');
+
+  // ── Migrações incrementais ────────────────────────────────────────────────
+  // Garante que bancos já existentes recebam as colunas/alterações novas
+  // sem precisar recriar tudo do zero.
+  console.log('🔄 Aplicando migrações incrementais...');
+
+  const incrementais = [
+    // Adiciona arquivo_resource_type se não existir
+    `ALTER TABLE contratos ADD COLUMN IF NOT EXISTS arquivo_resource_type VARCHAR(10) DEFAULT 'raw'`,
+
+    // Aumenta tamanho do arquivo_nome para suportar URLs longas do Cloudinary
+    `ALTER TABLE contratos MODIFY COLUMN arquivo_nome VARCHAR(500)`,
+
+    // Adiciona 'vencido' ao ENUM de status dos contratos
+    `ALTER TABLE contratos MODIFY COLUMN status ENUM('ativo', 'encerrado', 'pendente', 'vencido') DEFAULT 'ativo'`,
+  ]
+
+  for (const query of incrementais) {
+    try {
+      await connection.query(query)
+    } catch (e) {
+      // Ignora erros de "coluna já existe" em bancos antigos que não suportam IF NOT EXISTS
+      if (!e.message.includes('Duplicate column')) {
+        console.warn(`⚠️  Aviso na migração incremental: ${e.message}`)
+      }
+    }
+  }
+
+  console.log('✅ Migrações incrementais aplicadas!');
 
   await connection.end();
 }
