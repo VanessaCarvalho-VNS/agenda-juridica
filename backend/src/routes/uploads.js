@@ -4,6 +4,8 @@ const auth       = require('../middlewares/auth')
 const db         = require('../database/db')
 const cloudinary = require('cloudinary').v2
 const { Readable } = require('stream')
+const https      = require('https')
+const http       = require('http')
 
 const router = express.Router()
 router.use(auth)
@@ -51,7 +53,7 @@ function uploadToCloudinary(buffer, filename, mimetype) {
       {
         folder: 'agenda-juridica/contratos',
         public_id: filename,
-        resource_type: resourceType, // 'raw' para PDF/DOC, 'image' para PNG/JPG
+        resource_type: resourceType,
         type: 'upload',
         access_mode: 'public',
       },
@@ -67,20 +69,13 @@ function uploadToCloudinary(buffer, filename, mimetype) {
   })
 }
 
-// ── Helper: corrige URL para download ─────────────────────────────────────
-function buildDownloadUrl(url) {
+// ── Helper: corrige URL para garantir /raw/upload/ em PDFs/DOCs ───────────
+function fixCloudinaryUrl(url) {
   if (!url) return null
-
-  // Garante que PDFs/DOCs usam /raw/upload/ na URL
-  let fixedUrl = url
-  if (fixedUrl.includes('/image/upload/') && !fixedUrl.match(/\.(png|jpg|jpeg)$/i)) {
-    fixedUrl = fixedUrl.replace('/image/upload/', '/raw/upload/')
+  if (url.includes('/image/upload/') && !url.match(/\.(png|jpg|jpeg)$/i)) {
+    return url.replace('/image/upload/', '/raw/upload/')
   }
-
-  // Adiciona flag de download forçado
-  fixedUrl = fixedUrl.replace('/upload/', '/upload/fl_attachment/')
-
-  return fixedUrl
+  return url
 }
 
 // ── POST /api/uploads/contratos/:id ───────────────────────────────────────
@@ -88,21 +83,20 @@ router.post('/contratos/:id', upload.single('arquivo'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' })
 
-    // Verifica se o contrato pertence ao usuário
     const [rows] = await db.query(
       'SELECT id, arquivo_nome, arquivo_resource_type FROM contratos WHERE id = ? AND usuario_id = ?',
       [req.params.id, req.user.id]
     )
     if (rows.length === 0) return res.status(404).json({ error: 'Contrato não encontrado' })
 
-    // Se já tinha arquivo no Cloudinary, remove o antigo
+    // Remove arquivo antigo do Cloudinary se existir
     if (rows[0].arquivo_nome) {
       try {
-        const urlParts   = rows[0].arquivo_nome.split('/')
+        const urlParts    = rows[0].arquivo_nome.split('/')
         const fileWithExt = urlParts.pop()
-        const filename   = fileWithExt.split('.')[0]
-        const publicId   = `agenda-juridica/contratos/${filename}`
-        const oldType    = rows[0].arquivo_resource_type || 'raw'
+        const filename    = fileWithExt.split('.')[0]
+        const publicId    = `agenda-juridica/contratos/${filename}`
+        const oldType     = rows[0].arquivo_resource_type || 'raw'
         await cloudinary.uploader.destroy(publicId, { resource_type: oldType })
       } catch (e) { /* ignora se não encontrar */ }
     }
@@ -126,7 +120,7 @@ router.post('/contratos/:id', upload.single('arquivo'), async (req, res) => {
       arquivo: {
         nome_original: req.file.originalname,
         tamanho:       req.file.size,
-        url:           buildDownloadUrl(result.secure_url)
+        url:           result.secure_url
       }
     })
   } catch (err) {
@@ -146,14 +140,54 @@ router.get('/contratos/:id/arquivos', async (req, res) => {
 
     const arquivos = []
     if (rows[0].arquivo_nome) {
+      const url = fixCloudinaryUrl(rows[0].arquivo_nome)
       arquivos.push({
         nome: rows[0].arquivo_nome.split('/').pop(),
-        url:  buildDownloadUrl(rows[0].arquivo_nome) // ✅ URL corrigida com fl_attachment
+        url:  url
       })
     }
     res.json(arquivos)
   } catch (err) {
     res.status(500).json({ error: 'Erro ao listar arquivos' })
+  }
+})
+
+// ── GET /api/uploads/contratos/:id/download ───────────────────────────────
+// Proxy de download: busca o arquivo no Cloudinary e serve ao usuário
+router.get('/contratos/:id/download', async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      'SELECT arquivo_nome FROM contratos WHERE id = ? AND usuario_id = ?',
+      [req.params.id, req.user.id]
+    )
+    if (rows.length === 0) return res.status(404).json({ error: 'Contrato não encontrado' })
+    if (!rows[0].arquivo_nome) return res.status(404).json({ error: 'Nenhum arquivo anexado' })
+
+    const url      = fixCloudinaryUrl(rows[0].arquivo_nome)
+    const filename = rows[0].arquivo_nome.split('/').pop()
+
+    // Define o header para forçar download no browser
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition')
+
+    // Faz proxy do arquivo: busca no Cloudinary e repassa para o cliente
+    const protocol = url.startsWith('https') ? https : http
+    protocol.get(url, (fileRes) => {
+      if (fileRes.headers['content-type']) {
+        res.setHeader('Content-Type', fileRes.headers['content-type'])
+      }
+      if (fileRes.headers['content-length']) {
+        res.setHeader('Content-Length', fileRes.headers['content-length'])
+      }
+      fileRes.pipe(res)
+    }).on('error', (err) => {
+      console.error('Erro no proxy de download:', err)
+      res.status(500).json({ error: 'Erro ao baixar arquivo' })
+    })
+
+  } catch (err) {
+    console.error('Erro no download:', err)
+    res.status(500).json({ error: 'Erro ao baixar arquivo: ' + err.message })
   }
 })
 
@@ -172,7 +206,7 @@ router.delete('/contratos/:id/arquivo', async (req, res) => {
         const fileWithExt = urlParts.pop()
         const filename    = fileWithExt.split('.')[0]
         const publicId    = `agenda-juridica/contratos/${filename}`
-        const resourceType = rows[0].arquivo_resource_type || 'raw' // ✅ usa o tipo salvo
+        const resourceType = rows[0].arquivo_resource_type || 'raw'
         await cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
       } catch (e) { /* ignora */ }
 
