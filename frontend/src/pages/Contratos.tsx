@@ -50,6 +50,7 @@ export default function Contratos() {
   const [fetching, setFetching]         = useState(true)
   const [arquivosMap, setArquivosMap]   = useState<Record<number, Arquivo[]>>({})
   const [uploading, setUploading]       = useState<number | null>(null)
+  const [downloading, setDownloading]   = useState<number | null>(null)
   const [page, setPage]                 = useState(1)
   const [showValor, setShowValor]       = useState(true)
   const fileRef         = useRef<HTMLInputElement>(null)
@@ -71,6 +72,39 @@ export default function Contratos() {
       const data = await res.json()
       setArquivosMap(prev => ({ ...prev, [id]: data }))
     } catch { /* silencioso */ }
+  }
+
+  // ── Download via proxy do backend ────────────────────────────────────────
+  const handleDownload = async (contratoId: number, nomeArquivo: string) => {
+    setDownloading(contratoId)
+    try {
+      const token = localStorage.getItem('token')
+      const res   = await fetch(`${API_BASE}/uploads/contratos/${contratoId}/download`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Erro ao baixar arquivo')
+      }
+
+      // Converte a resposta em blob e cria link de download
+      const blob     = await res.blob()
+      const blobUrl  = URL.createObjectURL(blob)
+      const a        = document.createElement('a')
+      a.href         = blobUrl
+      a.download     = nomeArquivo
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+
+      toast.success('Download iniciado!')
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao baixar arquivo')
+    } finally {
+      setDownloading(null)
+    }
   }
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -145,8 +179,7 @@ export default function Contratos() {
       toast.success(`"${file.name}" enviado com sucesso!`)
       await carregarArquivos(id)
 
-      // Atualiza arquivo_nome no contrato local
-      setContratos(cs => cs.map(c => c.id === id ? { ...c, arquivo_nome: data.arquivo.nome_salvo } : c))
+      setContratos(cs => cs.map(c => c.id === id ? { ...c, arquivo_nome: data.arquivo.url } : c))
     } catch (err: any) {
       toast.error(err.message || 'Erro ao enviar arquivo')
     } finally {
@@ -375,13 +408,21 @@ export default function Contratos() {
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-medium truncate">{doc.nome}</p>
-                            <p className="text-xs text-slate-400">{fmtBytes(doc.tamanho)}</p>
+                            <p className="text-xs text-slate-400">{doc.tamanho ? fmtBytes(doc.tamanho) : ''}</p>
                           </div>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">
-                          <Button variant="ghost" size="sm" title="Download"
-                            onClick={() => window.open(doc.url, '_blank')}>
-                            <Download className="w-4 h-4" />
+                          {/* ✅ Download via proxy do backend */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Download"
+                            disabled={downloading === selected.id}
+                            onClick={() => handleDownload(selected.id, doc.nome)}
+                          >
+                            {downloading === selected.id
+                              ? <Loader2 className="w-4 h-4 animate-spin" />
+                              : <Download className="w-4 h-4" />}
                           </Button>
                           <Button variant="ghost" size="sm" title="Remover arquivo"
                             onClick={() => handleDeleteArquivo(selected.id)}>
